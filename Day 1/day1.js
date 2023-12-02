@@ -1,6 +1,10 @@
 const fs = require("node:fs");
 let inputLines;
 
+function reverseString(str) {
+  return str.split("").reverse().join("");
+}
+
 // read input file
 fs.readFile("input.txt", "utf8", (err, data) => {
   if (err) {
@@ -40,8 +44,52 @@ fs.readFile("input.txt", "utf8", (err, data) => {
 
     // creates boolean isNumber that tests if an element doesn't return NaN when the Number() operator is applied
     const isNumber = (element) => !isNaN(Number(element));
-    numberFirst = chars[chars.findIndex(isNumber)];
-    numberLast = charsReversed[charsReversed.findIndex(isNumber)];
+    let tempString = "";
+    let found = false;
+
+    // loop through chars
+    for (const character of chars) {
+      if (isNumber(character)) {
+        numberFirst = character;
+        break;
+      } else {
+        tempString += character;
+        numberWords.forEach((word) => {
+          if (tempString.includes(word)) {
+            numberFirst = String(
+              numberWords.findIndex((element) => element == word) + 1
+            );
+            found = true;
+          }
+        });
+      }
+      if (found) break;
+    }
+
+    tempString = "";
+    let tempStringReversed = "";
+    found = false;
+
+    // loop through charsReversed
+    for (const character of charsReversed) {
+      if (isNumber(character)) {
+        numberLast = character;
+        break;
+      } else {
+        tempString += character;
+        tempStringReversed = reverseString(tempString);
+        numberWords.forEach((word) => {
+          if (tempStringReversed.includes(word)) {
+            numberLast = String(
+              numberWords.findIndex((element) => element == word) + 1
+            );
+            found = true;
+          }
+        });
+      }
+      if (found) break;
+    }
+
     calibrationValue = Number([numberFirst, numberLast].join(""));
     runningTotal += calibrationValue;
   });
