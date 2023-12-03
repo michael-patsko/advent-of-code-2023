@@ -31,7 +31,7 @@ fs.readFile("input.txt", "utf8", (err, data) => {
   let red_total = 12;
   let green_total = 13;
   let blue_total = 14;
-  let ID_total = 0;
+  let power_total = 0;
 
   games.forEach((game) => {
     // push the ID number of each game to an array called games_IDs
@@ -44,13 +44,7 @@ fs.readFile("input.txt", "utf8", (err, data) => {
   // check if the highest number of each colour shown is less than the given values
   // if they are, add the ID to a running total
   for (i = 0; i < games_IDs.length; i++) {
-    if (
-      red_nums[i] <= red_total &&
-      green_nums[i] <= green_total &&
-      blue_nums[i] <= blue_total
-    ) {
-      ID_total += games_IDs[i];
-    }
+    power_total += red_nums[i] * green_nums[i] * blue_nums[i];
   }
-  console.log(ID_total);
+  console.log(power_total);
 });
