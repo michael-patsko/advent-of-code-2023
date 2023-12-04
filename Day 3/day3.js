@@ -68,5 +68,5 @@ fs.readFile("input.txt", "utf8", (err, data) => {
   validGears.forEach((gear) => {
     gearRatioTotal += gear.parts[0].number * gear.parts[1].number;
   });
-  console.log(gearRatioTotal);
+  console.log(validGears);
 });

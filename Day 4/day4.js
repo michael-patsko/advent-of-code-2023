@@ -20,7 +20,7 @@ fs.readFile("input.txt", "utf8", (err, data) => {
   let card_numbers = [];
   let winning_numbers = [];
   let numbers_owned = [];
-  let card_points = [];
+  let card_details = [];
   data = data.split(/\r?\n/);
   data.forEach((element) => {
     // push card numbers to card_numbers array
@@ -44,12 +44,27 @@ fs.readFile("input.txt", "utf8", (err, data) => {
   });
   for (let i = 0; i < card_numbers.length; i++) {
     let common_numbers = compareNumbers(winning_numbers[i], numbers_owned[i]);
-    if (common_numbers !== 0) {
-      card_points.push(Math.pow(2, common_numbers - 1));
-    } else {
-      card_points.push(0);
+    card_details.push({
+      card_number: card_numbers[i],
+      winning_numbers: winning_numbers[i],
+      numbers_owned: numbers_owned[i],
+      common_numbers: common_numbers,
+      card_copies: 1,
+    });
+  }
+
+  for (i = 0; i < card_details.length; i++) {
+    for (j = 1; j <= card_details[i].common_numbers; j++) {
+      card_details[i + j].card_copies += card_details[i].card_copies;
     }
   }
-  let total = card_points.reduce((a, b) => a + b, 0);
-  console.log(total);
+  // card_details.forEach((card) => {
+  //   console.log(
+  //     "Card number: ",
+  //     card.card_number,
+  //     "| Card copies: ",
+  //     card.card_copies
+  //   );
+  // });
+  console.log(card_details.reduce((a, b) => a + b.card_copies, 0));
 });
