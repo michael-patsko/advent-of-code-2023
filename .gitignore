@@ -1,0 +1,9 @@
+# node modules folder
+/node_modules
+
+# workspace specific folder
+/.vscode
+
+# test documents
+test.txt
+test.js
