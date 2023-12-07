@@ -1,10 +1,13 @@
-const fs = require("node:fs");
+const fs = require("fs");
 
-fs.readFile("test.txt", "utf8", (err, data) => {
-  if (err) {
-    console.error(`File read error: ${err.message}`);
-    return;
-  }
-  data = data.split(/\r?\n/);
-  // code goes here
-});
+function readFileAndParse(filePath) {
+  const content = fs.readFileSync(filePath, "utf8");
+  const lines = content.split(/\r?\n/);
+  return lines;
+}
+
+// code goes here
+
+const filePath = "test.txt";
+const lines = readFileAndParse(filePath);
+console.log(lines);
