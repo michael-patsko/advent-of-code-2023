@@ -19,7 +19,7 @@ function setsEqual(set1, set2) {
 }
 
 function writeMatrixToFile(matrix, filePath) {
-  console.log(`Writing matrix to ${filePath}`);
+  console.log(`\nWriting matrix to ${filePath}...`);
   const lines = matrix.map((row) => row.join(" "));
 
   const fileContent = lines.join("\n");
@@ -131,12 +131,10 @@ function main(fileName) {
 
   for (pipe of startPipes) {
     try {
-      console.log("---");
       let pipesGrid = originalGrid.map((row) => [...row]);
       pipesGrid[startPoint[0]][startPoint[1]] = pipe;
       const visitedForward = followPipes(pipesGrid, startPoint, "forward");
       const visitedBackward = followPipes(pipesGrid, startPoint, "backward");
-      const maxSteps = visitedForward.size / 2;
 
       // Check if the loop is the same when followed in both directions
       if (setsEqual(visitedForward, visitedBackward)) {
@@ -160,17 +158,59 @@ function main(fileName) {
           pipesGrid[i][j] = pipeToUnicodeMapping[pipeType] || pipeType;
         });
 
+        // Use Pick's theorem to determine number of points inside loop
+        let closedLoopLength = visitedForward.size;
+
+        // Calculate area using shoelace formula
+        let internalArea = findArea(loopNodes, pipesGrid);
+        let insidePoints = internalArea + 1 - closedLoopLength / 2;
+
         writeMatrixToFile(pipesGrid, "output.txt");
         console.log("File writing complete.");
 
+        const maxSteps = visitedForward.size / 2;
         console.log(`Max steps for start pipe ${pipe}:`, maxSteps);
+        console.log(`Points inside loop: `, insidePoints);
+        return;
       } else {
-        console.error(`Invalid loop for start pipe: ${pipe}`);
+        console.error(`\nInvalid loop for start pipe: ${pipe}`);
       }
     } catch (error) {
       console.error(`Invalid loop for start pipe: ${pipe}`);
     }
   }
+}
+
+function determinantOfPoints(coord1, coord2, gridPoints) {
+  // coord [i, j], where i is column and j is row
+  // suppose we have [1 ,2] for 7 by 7 matrix
+  // this is equivalent to (2, 6)
+  // for [i, j] we have (j, height - i)
+
+  let height = gridPoints.length;
+
+  let x1 = coord1[1];
+  let x2 = coord2[1];
+  let y1 = height - coord1[0];
+  let y2 = height - coord2[0];
+
+  let a = x1;
+  let b = x2;
+  let c = y1;
+  let d = y2;
+  return a * d - b * c;
+}
+
+function findArea(loopNodes, gridPoints) {
+  let area = determinantOfPoints(
+    loopNodes[loopNodes.length - 1],
+    loopNodes[0],
+    gridPoints
+  );
+  for (i = 0; i < loopNodes.length - 1; i++) {
+    area += determinantOfPoints(loopNodes[i], loopNodes[i + 1], gridPoints);
+  }
+  return Math.abs(area / 2);
 }
 
 main("input");
