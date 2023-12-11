@@ -18,6 +18,15 @@ function setsEqual(set1, set2) {
   return result(set1, set2);
 }
 
+function writeMatrixToFile(matrix, filePath) {
+  console.log(`Writing matrix to ${filePath}`);
+  const lines = matrix.map((row) => row.join(" "));
+
+  const fileContent = lines.join("\n");
+
+  fs.writeFileSync(filePath, fileContent, "utf8");
+}
+
 function readFileAndParse(filePath) {
   const content = fs.readFileSync(filePath, "utf8");
   const lines = content.split(/\r?\n/);
@@ -122,6 +131,7 @@ function main(fileName) {
 
   for (pipe of startPipes) {
     try {
+      console.log("---");
       let pipesGrid = originalGrid.map((row) => [...row]);
       pipesGrid[startPoint[0]][startPoint[1]] = pipe;
       const visitedForward = followPipes(pipesGrid, startPoint, "forward");
@@ -130,6 +140,29 @@ function main(fileName) {
 
       // Check if the loop is the same when followed in both directions
       if (setsEqual(visitedForward, visitedBackward)) {
+        let loopNodes = [];
+
+        const pipeToUnicodeMapping = {
+          "|": "│", // Vertical line
+          "-": "─", // Horizontal line
+          J: "╯", // Angle down and left
+          7: "╮", // Angle up and left
+          F: "╭", // Angle up and right
+          L: "╰", // Angle down and right
+        };
+
+        visitedForward.forEach((node) => {
+          loopNodes.push(node.match(/\d+/g).map(Number));
+        });
+        loopNodes.forEach((node) => {
+          const [i, j] = node;
+          const pipeType = pipesGrid[i][j];
+          pipesGrid[i][j] = pipeToUnicodeMapping[pipeType] || pipeType;
+        });
+
+        writeMatrixToFile(pipesGrid, "output.txt");
+        console.log("File writing complete.");
+
         console.log(`Max steps for start pipe ${pipe}:`, maxSteps);
       } else {
         console.error(`Invalid loop for start pipe: ${pipe}`);
