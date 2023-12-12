@@ -189,11 +189,10 @@ function manhattanDistance(matrix, start, end) {
   return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 }
 
-function main(fileName) {
-  const filePath = `${fileName}.txt`;
-  let image = readFileAndParse(filePath);
+function galacticExpansion(image, number) {
+  number = number - 1;
   let { emptyRows, emptyColumns } = findEmptyRowsColumns(image);
-  const number = 1;
+
   // Galactic expansion
   for (let i in emptyRows) {
     image = insertBelow(image, emptyRows[i], number);
@@ -225,8 +224,23 @@ function main(fileName) {
       totalDistance += distance;
     }
   }
+  return totalDistance;
+}
 
-  console.log("Total distance: ", totalDistance);
+function main(fileName) {
+  const filePath = `${fileName}.txt`;
+  let image = readFileAndParse(filePath);
+  let totalDistance = [];
+  let initialValue = galacticExpansion(image, 2);
+  totalDistance.push(initialValue);
+  totalDistance.push(galacticExpansion(image, 3));
+  const sequenceDifference = totalDistance[1] - totalDistance[0];
+
+  const expansion = 1000000;
+  console.log(
+    `Total distances for expansion factor ${expansion}: `,
+    (expansion - 2) * sequenceDifference + initialValue
+  );
   // writeMatrixToFile(matrix, "output.txt");
   // console.log("Output.txt saved successfully.");
 }
