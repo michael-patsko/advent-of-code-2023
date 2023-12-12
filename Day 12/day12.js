@@ -1,27 +1,5 @@
 const fs = require("fs");
 
-// Taken from https://stackoverflow.com/questions/24241462/how-to-search-for-multiple-indexes-of-same-values-in-javascript-array
-Array.prototype.findIndices = function (element) {
-  var indices = [];
-  for (var i = this.length - 1; i >= 0; i--) {
-    if (this[i] === element) {
-      indices.unshift(i);
-    }
-  }
-  return indices;
-};
-
-// Taken from https://stackoverflow.com/questions/22395357/how-to-compare-two-arrays-are-equal-using-javascript
-function arraysEqual(arr1, arr2) {
-  // Checks if 2 arrays have the same length, and are equal elementwise, and determines the arrays to be equal if so
-  const result =
-    arr1.length == arr2.length &&
-    arr1.every(function (element, index) {
-      return element === arr2[index];
-    });
-  return result;
-}
-
 function readFileAndParse(filePath) {
   const content = fs.readFileSync(filePath, "utf8");
   const lines = content.split(/\r?\n/);
@@ -34,48 +12,102 @@ function readFileAndParse(filePath) {
   return springs;
 }
 
-function findArrangements(symbols, numbers) {
-  let count = numbers.reduce((a, b) => a + b, 0);
-  symbols = symbols[0].split("");
-  let unknownIndices = symbols.findIndices("?");
+// Taken from Jonathan Paulson: https://github.com/jonathanpaulson/AdventOfCode/blob/master/2023/12.py
+// Video explaining his solution found here: https://www.youtube.com/watch?v=xTGkP2GNmbQ
 
-  let arrangements = [];
-  generateCombinations(symbols, unknownIndices, 0, arrangements);
-  arrangements = arrangements.filter((arrangement) => {
-    const matches = arrangement.match(/#+/g);
-    if (!matches) return false;
-    return arraysEqual(
-      matches.map((element) => element.length),
-      numbers
-    );
-  });
-  return arrangements.length;
-}
+let dp = new Map();
+// Create new map we will use to store previously seen solutions
 
-function generateCombinations(array, indices, currentIndex, result) {
-  // When all combinations have been considered
-  if (currentIndex === indices.length) {
-    result.push(array.join(""));
-    return;
+function dynamicArrangements(
+  symbols,
+  numbers,
+  symbolsIndex,
+  numbersIndex,
+  currentBlock // length of current block of "#"
+) {
+  // the last 3 variables define our state
+  const key = `${symbolsIndex}-${numbersIndex}-${currentBlock}`;
+  if (dp.has(key)) return dp.get(key); // If we have seen this configuration before, retrieve it from our map
+
+  if (symbolsIndex === symbols.length) {
+    if (numbersIndex === numbers.length && currentBlock === 0) {
+      return 1; // ran through all blocks and no # being processed
+    } else if (
+      numbersIndex === numbers.length - 1 &&
+      numbers[numbersIndex] === currentBlock
+    ) {
+      return 1; // on the last block and we've filled it in
+    } else {
+      return 0; // invalid block
+    }
   }
-
-  // Temporarily replace the character at currentIndex with #
-  // Runs this function recursively, incrementing currentIndex by 1
-  // Each call builds upon the previous, creating a new combination
-  array[indices[currentIndex]] = "#";
-  generateCombinations(array, indices, currentIndex + 1, result);
-
-  // Effectively does the same as above, but for questions marks
-  // Thereby creating all combinations of # and ?
-  array[indices[currentIndex]] = "?";
-  generateCombinations(array, indices, currentIndex + 1, result);
+  let result = 0;
+  for (const char of [".", "#"]) {
+    // place a . or #
+    if (symbols[symbolsIndex] === char || symbols[symbolsIndex] === "?") {
+      if (char === "." && currentBlock === 0) {
+        result += dynamicArrangements(
+          symbols,
+          numbers,
+          symbolsIndex + 1,
+          numbersIndex,
+          0
+        );
+      } else if (
+        // move onto the next block
+        char === "." &&
+        currentBlock > 0 &&
+        numbersIndex < numbers.length &&
+        numbers[numbersIndex] === currentBlock
+      ) {
+        result += dynamicArrangements(
+          symbols,
+          numbers,
+          symbolsIndex + 1,
+          numbersIndex + 1,
+          0
+        );
+      } else if (char === "#") {
+        // increment current block
+        result += dynamicArrangements(
+          symbols,
+          numbers,
+          symbolsIndex + 1,
+          numbersIndex,
+          currentBlock + 1
+        );
+      }
+    }
+  }
+  dp.set(key, result);
+  return result;
 }
 
 const filePath = "input.txt";
 const springs = readFileAndParse(filePath);
-let totalArrangements = 0;
-springs.forEach((numbers, symbols) => {
-  let arrangements = findArrangements(symbols, numbers);
-  totalArrangements += arrangements;
-});
-console.log(totalArrangements);
+
+for (const part2 of [false, true]) {
+  part2 ? console.log("\n--- Part 2 ---") : console.log("\n--- Part 1 ---");
+  let totalArrangements = 0;
+  let counter = 0;
+
+  springs.forEach((numbers, symbols) => {
+    if (part2) {
+      symbols = [symbols, symbols, symbols, symbols, symbols].join("?");
+      numbers = [numbers, numbers, numbers, numbers, numbers]
+        .join(",")
+        .split(",")
+        .map(Number);
+    } else {
+      symbols = symbols[0];
+    }
+
+    dp.clear();
+    let arrangements = dynamicArrangements(symbols, numbers, 0, 0, 0);
+    totalArrangements += arrangements;
+    counter += 1;
+    if (counter % 100 === 0)
+      console.log(`Number of springs processsed: `, counter);
+  });
+  console.log(`Total arrangements: `, totalArrangements);
+}
