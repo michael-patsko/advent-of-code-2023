@@ -12,7 +12,7 @@
   
 - [Things to Improve](#things-to-improve)
   
-- [Preamble](#preamble)
+- [Reflections on my Approach](#reflections-on-my-approach)
   
 - [Day 1: Trebuchet?!](#day-1-trebuchet)
   
