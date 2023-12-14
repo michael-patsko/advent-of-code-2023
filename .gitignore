@@ -5,6 +5,7 @@
 /.vscode
 
 # test documents
+/input.txt
 test.txt
 test.js
 output.txt
