@@ -9,23 +9,22 @@
 ## Table of Contents
 
 - [Things Learned](#things-learned)
-  
+
 - [Things to Improve](#things-to-improve)
-  
-- [Reflections on my Approach](#reflections-on-my-approach)
-  
+
+- [Preamble](#preamble)
+
 - [Day 1: Trebuchet?!](#day-1-trebuchet)
-  
+
 - [Day 2: Cube Conundrum](#day-2-cube-conundrum)
-  
+
 - [Day 5: If You Give a Seed a Fertilizer](#day-5-if-you-give-a-seed-a-fertilizer)
-  
+
 - [Day 7: Camel Cards](#day-7-camel-cards)
-  
+
 - [Day 8: Haunted Wasteland](#day-8-haunted-wasteland)
-  
+
 - [Day 9: Mirage Maintenance](#day-9-mirage-maintenance)
-  
 
 ---
 
@@ -45,9 +44,8 @@ console.log(Math.max(...Object.values(obj)));
     would return `7`.
 
 - Dynamic programming - reusing previously calculated states to save computation time.
-  
+
 - Frustrating subtle difference between `in` and `of` in JavaScript `for` loops. I had an error in my code at one point due to a misunderstanding in my use of `in` ; I had code that was formatted approximately as follows:
-  
 
 ```js
 function replaceAt(str, index, replacementChar) {
@@ -63,22 +61,20 @@ function replaceAt(str, index, replacementChar) {
 
 ## Things to Improve
 
-- In future attempts, I would like to use a more strongly typed language, such as TypeScript or Python.
-  
+- In future attempts, I would like to use a more strongly typed language, such as TypeScript or Python :snake:.
+
 - I need to improve the error handling in my code.
-  
+
 - Crediting borrowed code from the outset is important. In the early days, I might have used code from [Stack Overflow](https://stackoverflow.com/) without proper credit. See Day 2 `Array.min` and `Array.max` for an example. It's crucial to credit others for their contributions, regardless of the code's complexity.
-  
 
 ## Reflections on my Approach
 
 - My approach involved quickly writing code to find the correct answer, 
   without focusing on tidiness or optimization unless necessary.
-  
+
 - I opted to use JavaScript, not necessarily because it was the best language of choice for all puzzles, but because I find it easy to use for prototyping, and it proves suitable for most simple applications. Equally, it had been a while since I had done any challenging coding due to a period of illness, and so the ease of use and (broad amount?) of conversation around JavaScript and node.js online made it easy to jump back into.
-  
+
 - Similarly, my version control was very limited; my commits consist almost of exclusively of me adding an entire .js file for each part of the day's challenge, with a comment like `day 2 part 1 working solution`.
-  
 
 ---
 
@@ -160,7 +156,7 @@ From the puzzle brief:
 
 #### My Solution
 
-Day 5 was challenging, requiring significant code optimisation, like replacing RegEx with string modification. I also forgot to commit my working solution to part 1. Oh well.
+Day 5 was challenging, requiring significant code optimisation, like replacing RegEx with string modification. I also forgot to commit my working solution to part 1. Oh well. :shrug:
 
 In part 2, I initially tried storing all seeds as calculated from their ranges, but this proved to be too memory-intensive, causing the program to terminate with an error for the larger input. Instead, I decided to store the ranges themselves, and modify my code to process them one-by-one, as calculated from their range. This saves storing all the seeds in memory. The solution still took a good few minutes to process though, so I set out on optimising it further.
 
@@ -170,7 +166,7 @@ In part 2, I initially tried storing all seeds as calculated from their ranges, 
 
 ### Part 1
 
-I began Day 7 by updating my template file to incorporate improvements learned from Day 5. This included changes such as using `camelCase` for my variable names, better separation of concerns into different variables, and removing some redundant error logging.
+I began Day 7 by updating my template file to incorporate improvements learned from Day 5. This included changes such as using `camelCase`:camel: for my variable names, better separation of concerns into different variables, and removing some redundant error logging.
 
 #### My Solution
 
@@ -241,5 +237,93 @@ After I finally caved and looked at the subreddit, I saw that others had also tr
 In the end I settled on Pick's theorem (again from the subreddit). This proved to not be too bad of an implementation actually, perhaps in thanks to my mathematical background. Aside from a little (hackery?) in getting my shoelace theorem `findArea`function to work (it kept returning negative so I simply took the absolute value), I finally got part 2 working. This was easily the hardest so far in my opinion.
 
 #### My Solution
+
+---
+
+## Day 14: Parabolic Reflector Dish
+
+On day 14, our input consists of a large grid of the characters `#`, `O`, and `.`, representing **square rocks**, **round rocks**, and **empty space** respectively. The grid as a whole represents a [parabolic reflector dish](https://en.wikipedia.org/wiki/Parabolic_reflector), with the rocks sitting on top. When the dish is tilted in a direction, the round rocks will roll, but the square rocks won't. For example:
+
+```txt
+O....#....
+O.OO#....#
+.....##...
+OO.#O....O
+.O.....O#.
+O.#..O.#.#
+..O..#O..O
+.......O..
+#....###..
+#OO..#....
+```
+
+After tilting this dish north, we are left with:
+
+```txt
+OOOO.#.O..
+OO..#....#
+OO..O##..O
+O..#.OO...
+........#.
+..#....#.#
+..O..#.O.O
+..O.......
+#....###..
+#....#....
+```
+
+### Part 1
+
+Part 1 tasks us with determining the load on the dish's north support beams, after the dish is tilted such that all the round rocks roll **north**. The amount of load exerted by a single round rock is equal to the number of rows from the rock to the south edge of the platform, including the row that the rock is on. So for the above example:
+
+```txt
+OOOO.#.O.. 10
+OO..#....#  9
+OO..O##..O  8
+O..#.OO...  7
+........#.  6
+..#....#.#  5
+..O..#.O.O  4
+..O.......  3
+#....###..  2
+#....#....  1
+```
+
+Adding up these values, we're left with a total load of **136**.
+
+#### My Solution
+
+---
+
+My solution to part 1 didn't involve anything particularly complex. First I split the input line by line, and then I split each line into it's constituent characters, giving me a matrix representation of the dish. Then I iterate through the matrix, stopping on square rocks, and searching below to find round rocks until I hit another square rock. Then I log the coordinates of this square rock and the count of rocks below in a `Map` object. If the square rock has no round rocks beneath, I simply ignore it and move on.
+
+I suppose where my solution takes a bit of an unusual turn, is that instead of actually moving the rocks to their new positions, and then calculating their contribution based on their index, I derived a small formula that calculates the load from the indices of square rocks, and the number of rocks below them as calculated in my last function. For a square rock with vertical index $i$ and $n$ rocks beneath it, we have the formula:
+
+$$
+L = n \times (H - i - 1) - \sum_{k=1}^{n} k
+$$
+
+where $H$ is the height of our original matrix of rocks, and $L$ is the load exerted by these rocks on the north support. I've used [sigma notation](https://en.wikipedia.org/wiki/Summation) to represent the sum of integers from $1$ to $n$. Note that in the case of my code, we subtract $1$ from $H-i$, because I've added a layer of square rocks to the top of the matrix as part of my solution. Calculating $L$ for each square rock and totalling them we're left with our answer, which in the case of my input turned out to be **108813**.
+
+### Part 2
+
+For part 2, we're told that instead of just tilting the dish north, we'll tilt it **north**, then **west**, then **south**, then **east**. In fact, rather than just tilting the dish in this order once, we'll have these directions combine to form a **spin cycle**, which we will then repeat **1,000,000,000** times. After we've run the full spin cycle, *then* we calculate the load on the north beams.
+
+#### My Solution
+
+This is where I had to get a bit more clever. I started by adapting my functions for rolling the rocks north into functions for rolling the rocks east, south, and west. I definitely could've done this more tidily, probably adapting all 4 functions into a single function, but it was quicker and required less thought to just copy and paste the function a few times and change a few variables. Then I combined queued these 4 functions in another function called `spinCycle`, that would run those functions on the grid of rocks for some specified number of times, in our case 1,000,000,000.
+
+I knew that actually running this cycle 1,000,000,000 times wasn't an option. Instead, I applied what I had learnt on Day 12, albeit in a much simpler way this time, to store previously seen states of the grid in a `Map`, alongside the number of cycles that had been run at that time. Then, when I encounter a state I've seen before, I can stop running spin cycles, and use the information from my `Map` to calculate what the grid would look like at 1,000,000,000 cycles. More specifically, I use the following formulae:
+
+$$
+\begin{align*}
+R &= (N - S) \mod L \\
+F &= S + R \\
+\end{align*}
+$$
+
+where $R$ is the number of remaining cycles to reach the state at 1,000,000,000, $N$ is the total number of cycles, 1,000,000,000, $S$ is the number of cycles at the start of the loop, $L$ is the period of the loop in states, and $F$ is the cycle number we've previously encountered that corresponds to the state at cycle 1,000,000,000.
+
+Once we've calculated $F$, we can simply look this value up in our map of stored states, giving us the state at cycle 1,000,000,000. Then we can calculate the load on the north supports, and this time we do so by using the vertical indices of the round rocks, rather than my formula from part 1.
 
 ---
