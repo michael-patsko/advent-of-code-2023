@@ -26,6 +26,10 @@
 
 - [Day 9: Mirage Maintenance](#day-9-mirage-maintenance)
 
+- [Day 14: Parabolic Reflector Dish](#day-14-parabolic-reflector-dish)
+
+- [Day 18: Lavaduct Lagoon](#day-18-lavaduct-lagoon)
+
 ---
 
 ## Things Learned
@@ -145,6 +149,16 @@ From the puzzle brief:
 ---
 
 ### Part 2
+
+The Elf poses a second question; in each game, what is the **fewest number of cubes** in the bag to make each game possible? For example, in our game 1 from earlier:
+
+```txt
+Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+```
+
+This game could have been played with as few as 4 red, 2 green, and 6 blue cubes.
+
+Then, we define the **power** of a set of cubes as the value obtained by multiplying together the numbers of red, green, and blue cubes. In the case of the game above, we have **Power** = **4** \* **2** \* **6** = **48**. The final question we're posed is, what is the sum of the power of cubes across all games?
 
 #### My Solution
 
@@ -327,3 +341,97 @@ where $R$ is the number of remaining cycles to reach the state at 1,000,000,000,
 Once we've calculated $F$, we can simply look this value up in our map of stored states, giving us the state at cycle 1,000,000,000. Then we can calculate the load on the north supports, and this time we do so by using the vertical indices of the round rocks, rather than my formula from part 1.
 
 ---
+
+## Day 18: Lavaduct Lagoon
+
+Day 18's puzzle involves digging out a large area of land to serve as a lava lagoon:volcano:. Our input consists of a set of instructions that determine how we dig out this area. We're given a **dig plan** that looks something like the following:
+
+```txt
+R 6 (#70c710)
+D 5 (#0dc571)
+L 2 (#5713f0)
+D 2 (#d2c081)
+R 2 (#59c680)
+D 2 (#411b91)
+L 5 (#8ceee2)
+U 2 (#caa173)
+L 1 (#1b58a2)
+U 2 (#caa171)
+R 2 (#7807d2)
+U 3 (#a77fa3)
+L 2 (#015232)
+U 2 (#7a21e3)
+```
+
+For each line in our dig plan, we are given a **direction**, **distance**, and hexadecimal **colour code**. The directions are given from a birds eye view, so for example, `U` represents the direction pointing towards the top, or north of our land area. The distance is how far we will dig (in metres) in that direction before moving onto the next instruction, and the hexadecimal represents the colour that we will paint that section of lagoon edge.
+
+### Part 1
+
+In part 1, we're tasked with finding the volume of the lagoon dug out by these instructions. So for the above example dig plan, we first dig out the edge as follows:
+
+```txt
+#######
+#.....#
+###...#
+..#...#
+..#...#
+###.###
+#...#..
+##..###
+.#....#
+.######
+```
+
+Then, we dig out the interior, giving us
+
+```txt
+#######
+#######
+#######
+..#####
+..#####
+#######
+#####..
+#######
+.######
+.######
+```
+
+and a total volume of **62** cubic metres.
+
+#### My Solution
+
+For this puzzle, I started off by parsing the input into an array of objects, each containing the direction, distance, and colour code for that instruction. This allows me to easily follow the instructions in order, simply by iterating through the array. Then, starting at $[0,0]$, I follow the instructions one-by-one, adding each coordinate reached to a map of coordinates and their corresponding colour codes. Once I've obtained a list of all coordinates on the edge of the lagoon, I can use a combination of the [shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula) and [Pick's theorem](https://en.wikipedia.org/wiki/Pick%27s_theorem) (as I did on day 10) to give me the number of points contained by the coordinates on the edge of the lagoon. Then I simply add the number of points inside this edge to the number of points on the edge, giving me my final lagoon volume.
+
+I also created a visualisation of the lagoon in a text file, similar to those shown in the examples, and this involved a slight reorientation of my coordinate system; moving the start point from $[0, 0]$ to a point elsewhere in the plane, such that my values for $x$ and $y$ never become negative. This doesn't affect any of the final values however, and the maths involved remains the same.
+
+---
+
+### Part 2
+
+In part 2, we discover that somebody had accidentally swapped some details on the instructions, meaning we had been reading them incorrectly all along. It turns out the hexadecimal doesn't correspond to a colour, and instead it encodes the direction and distance for each instruction. On each line of the instructions, the **first five digits** of hexadecimal represent the distance once converted back to decimal, and the **last digit** corresponds to our direction; **0** to **R**, **1** to **D**, **2** to **L**, and **3** to **U**. With this knowledge, we can convert our dig plan to the true instructions, and it quickly becomes clear that our new lagoon is going to be much larger. For example, our original example input now becomes:
+
+```txt
+R 461937
+D 56407
+R 356671
+D 863240
+R 367720
+D 266681
+L 577262
+U 829975
+L 112010
+D 829975
+L 491645
+U 686074
+L 5411
+U 500254
+```
+
+#### My Solution
+
+Thankfully, this part 2 actually involved very little reworking. The main difference I had to make, was that instead of storing all edge points in memory and then calculating the total area using the shoelace formula, the updated area was calculated at the end of each instruction, saving massively on memory usage. Aside from this, the only other change that had to be made was how we parse the dig plan, but once these updates were made, I was able to run my code as before and obtain my answer. 
+
+---
+
+## Day 19
