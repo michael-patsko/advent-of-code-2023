@@ -9,9 +9,13 @@ function readFileAndParse(filePath) {
 
 // code goes here
 
-const filePath = "test.txt";
-const lines = readFileAndParse(filePath);
-console.log(lines);
+function main(fileName) {
+  const filePath = `${fileName}.txt`;
+  const lines = readFileAndParse(filePath);
+  console.log(lines);
+}
+
+main("test");
 
 let diff = process.hrtime(startTime);
 let timeInMilliseconds = diff[0] * 1000 + diff[1] / 1000000;
