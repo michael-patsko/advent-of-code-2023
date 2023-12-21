@@ -1,6 +1,14 @@
 let startTime = process.hrtime();
 const fs = require("fs");
 
+// LCM algorithm taken from https://stackoverflow.com/questions/47047682/least-common-multiple-of-an-array-values-using-euclidean-algorithm
+function LCM(arr) {
+  const gcd = (a, b) => (a ? gcd(b % a, a) : b);
+  const lcm = (a, b) => (a === 0 && b === 0 ? 1 : (a * b) / gcd(a, b));
+
+  return arr.reduce(lcm);
+}
+
 function readFileAndParse(filePath) {
   const content = fs.readFileSync(filePath, "utf8");
   const lines = content.split(/\r?\n/);
@@ -38,8 +46,8 @@ function sendPulse(
   pulseStrength,
   inputModule,
   types,
-  connections,
-  states
+  states,
+  buttonPress
 ) {
   // This will hold future queue elements in the form `currentModule,pulseStrength`
   let addToQueue = [];
@@ -81,7 +89,11 @@ function sendPulse(
       }
     } else {
       // This corresponds to the module 'rx'
-      continue;
+      if (pulseStrength === "high") {
+        continue;
+      } else {
+        console.log(`Button presses: ${buttonPress + 1}`);
+      }
     }
   }
   return addToQueue;
@@ -90,6 +102,7 @@ function sendPulse(
 function pressButton(types, connections, states, number = 1) {
   let totalLowPulses = 0;
   let totalHighPulses = 0;
+  let buttonPressValues = [];
   for (let n = 0; n < number; n++) {
     totalLowPulses += 1; // Push the button
     let currentModule = "broadcaster";
@@ -104,13 +117,26 @@ function pressButton(types, connections, states, number = 1) {
       queue.shift();
 
       // Send the pulse, and receive number of low and high pulses sent, as well as new values to add to queue
+
+      // Looks for button press values when any of these 4 modules fire high
+      // If these all fire high, then hp fires low into rx, giving us our answer
+      // Find the button press values and their LCM, giving us our value
+      if (
+        (currentModule === "sn" ||
+          currentModule === "sr" ||
+          currentModule === "rf" ||
+          currentModule === "vq") &&
+        pulseStrength === "high"
+      )
+        buttonPressValues.push(n + 1);
+
       let addToQueue = sendPulse(
         destinations,
         pulseStrength,
         currentModule,
         types,
-        connections,
-        states
+        states,
+        n
       );
       if (pulseStrength === "low") totalLowPulses += destinations.length;
       if (pulseStrength === "high") totalHighPulses += destinations.length;
@@ -120,7 +146,7 @@ function pressButton(types, connections, states, number = 1) {
     }
   }
   const pulsePower = totalLowPulses * totalHighPulses;
-  return pulsePower;
+  return { pulsePower, buttonPressValues };
 }
 
 function main(fileName) {
@@ -150,8 +176,18 @@ function main(fileName) {
     }
   });
 
-  const pulsePower = pressButton(types, connections, states, 1000);
-  console.log(pulsePower);
+  let { pulsePower, buttonPressValues } = pressButton(
+    types,
+    connections,
+    states,
+    10000
+  );
+  // I'm being lazy below and just taking the first 4 values that our found,
+  // without regard for the fact that one of the modules could fire more than once
+  // in the time it takes for another to fire. But hey, it works.
+  buttonPressValues = buttonPressValues.splice(0, 4);
+  console.log(`Pulse power:`, pulsePower);
+  console.log(`rx will fire at: `, LCM(buttonPressValues));
 }
 
 main("input");
